@@ -1,12 +1,27 @@
 import math
 
 
+SUPERSCRIPT_LOOKUP = {
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹',
+    '-': '⁻',
+}
+
+
 def parse(number: float, sigfigs: int=3) -> str:
     """Convert a number to a string representation of scientific notation."""
     if not isinstance(number, float) and not isinstance(number, int):
         raise ValueError("The first argument must be a number.")
     if not isinstance(sigfigs, int):
-        raise ValueError("sigfigsust be an integer.")
+        raise ValueError("sigfigs must be an integer.")
 
     # power is our number's order of magnitude.
     power = int(math.log10(abs(number)))
@@ -28,4 +43,7 @@ def parse(number: float, sigfigs: int=3) -> str:
     if power == 1:
         return f"{trimmed}×10"
 
-    return f"{trimmed}×10^{power}"
+    # Convert power to unicode superscript.
+    power_disp = ''.join([SUPERSCRIPT_LOOKUP[digit] for digit in str(power)])
+
+    return f"{trimmed}×10{power_disp}"

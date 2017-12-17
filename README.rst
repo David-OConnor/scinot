@@ -9,6 +9,8 @@ Example use:
 .. code-block:: python
 
     import scinot
+
+
     scinot.parse(341283875012.238)
     >> '3.41×10^11'
 
@@ -18,5 +20,7 @@ defaults to 3.
 .. code-block:: python
 
     import scinot
+
+
     scinot.parse(-.00000409348, 2)
     >> '-4.1×10^-6'
