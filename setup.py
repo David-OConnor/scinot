@@ -5,14 +5,14 @@ with open('README.rst') as f:
 
 setup(
     name="scinot",
-    version="0.0.1",
+    version="0.0.2",
     packages=find_packages(),
 
     install_requires=[],
 
     author="David O'Connor",
     author_email="david.alan.oconnor@gmail.com",
-    url='https://github.com/David-OConnor/fplot',
+    url='https://github.com/David-OConnor/scinot',
     description="Express numbers in scientific notation.",
     long_description=readme,
     license="MIT",
