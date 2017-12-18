@@ -1,4 +1,10 @@
 import math
+import sys
+from typing import Callable
+
+
+builtin_print = print
+builtin_stdout = sys.stdout.write
 
 
 SUPERSCRIPT_LOOKUP = {
@@ -41,9 +47,74 @@ def parse(number: float, sigfigs: int=3) -> str:
     if power == 0:
         return f"{trimmed}"
     if power == 1:
-        return f"{trimmed}×10"
+        return f"{trimmed} × 10"
 
     # Convert power to unicode superscript.
     power_disp = ''.join([SUPERSCRIPT_LOOKUP[digit] for digit in str(power)])
 
-    return f"{trimmed}×10{power_disp}"
+    return f"{trimmed} × 10{power_disp}"
+
+
+def disp(number: float, sigfigs: int=3) -> None:
+    """Wrapper around parse that, rather than returning a string,
+    prints to the console."""
+    builtin_print(parse(number, sigfigs))
+
+
+def overwritten_print(text, thresh: int=4, sigfigs: int=3) -> None:
+    try:
+        number = float(text)
+    except ValueError:
+        builtin_print(text)
+        return
+    
+    power = int(math.log10(abs(number)))
+
+    # Only process if the number's order of magnitude is greater than power_thresh.
+    if abs(power) >= thresh:
+        disp(number, sigfigs)
+    else:
+        builtin_print(text)
+
+
+def overwritten_stdout(text, thresh: int=5, sigfigs: int=3) -> None:
+    try:
+        number = float(text)
+    except ValueError:
+        builtin_stdout(text)
+        return
+    
+    power = int(math.log10(abs(number)))
+
+    # Only process if the number's order of magnitude is greater than power_thresh.
+    if abs(power) >= thresh:
+        disp(number, sigfigs)
+    else:
+        builtin_stdout(text)
+
+def temp():
+    print = overwritten_print
+    sys.stdout.write = overwritten_stdout
+
+
+def start(sigfigs: int=3) -> None:
+    """Override the print function, so appropriate numbers are displayed
+    in scientific notation."""
+
+    global print
+    # global sys.stdout.write
+
+    # builtin_print = print
+    # builtin_stdout = sys.stdout.write
+    
+    # print = partial(_overwritten_disp, __builtins__.print)
+    print = _overwritten_disp
+    # sys.stdout.write = partial(_overwritten_disp, builtin_stdout)
+
+
+def end() -> None:
+    """End builtin print-overriding."""
+    #global print
+
+    del print
+    del sys.stdout.write
