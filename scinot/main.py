@@ -1,11 +1,21 @@
+from functools import partial
 import math
 import sys
 from typing import Callable
 
+ipython_exists = True
+try:
+    import IPython, ipykernel.iostream
+except ModuleNotFoundError:
+    ipython_exists = False
 
+
+# Save the bulitin stdout and print here, since we'll modify them later.
 builtin_print = print
 builtin_stdout = sys.stdout.write
-
+if ipython_exists:
+    ipython_stdout = IPython.sys.stdout.write
+    ipyout = ipykernel.iostream.OutStream.write
 
 SUPERSCRIPT_LOOKUP = {
     '0': '⁰',
@@ -55,66 +65,42 @@ def parse(number: float, sigfigs: int=3) -> str:
     return f"{trimmed} × 10{power_disp}"
 
 
-def disp(number: float, sigfigs: int=3) -> None:
+def disp(number: float, sigfigs: int=3, display_func=builtin_print) -> None:
     """Wrapper around parse that, rather than returning a string,
     prints to the console."""
-    builtin_print(parse(number, sigfigs))
+    display_func(parse(number, sigfigs))
 
 
-def overwritten_print(text, thresh: int=4, sigfigs: int=3) -> None:
+def _overwritten_func(builtin_func: Callable, sigfigs: int, thresh: int, text: str) -> None:
+    """Override a display func like stdout or print."""
     try:
         number = float(text)
     except ValueError:
-        builtin_print(text)
+        builtin_func(text)
         return
     
     power = int(math.log10(abs(number)))
 
     # Only process if the number's order of magnitude is greater than power_thresh.
-    if abs(power) >= thresh:
-        disp(number, sigfigs)
+    if power >= thresh - 1 or power <= -thresh + 2:
+        disp(number, sigfigs, builtin_func)
     else:
-        builtin_print(text)
+        builtin_func(text)
 
 
-def overwritten_stdout(text, thresh: int=5, sigfigs: int=3) -> None:
-    try:
-        number = float(text)
-    except ValueError:
-        builtin_stdout(text)
-        return
-    
-    power = int(math.log10(abs(number)))
-
-    # Only process if the number's order of magnitude is greater than power_thresh.
-    if abs(power) >= thresh:
-        disp(number, sigfigs)
-    else:
-        builtin_stdout(text)
-
-def temp():
-    print = overwritten_print
-    sys.stdout.write = overwritten_stdout
-
-
-def start(sigfigs: int=3) -> None:
+def start(sigfigs: int=4, thresh: int=5) -> None:
     """Override the print function, so appropriate numbers are displayed
     in scientific notation."""
 
-    global print
-    # global sys.stdout.write
-
-    # builtin_print = print
-    # builtin_stdout = sys.stdout.write
-    
-    # print = partial(_overwritten_disp, __builtins__.print)
-    print = _overwritten_disp
-    # sys.stdout.write = partial(_overwritten_disp, builtin_stdout)
+    print = partial(_overwritten_func, builtin_print, sigfigs, thresh)
+    sys.stdout.write = partial(_overwritten_func, builtin_stdout, sigfigs, thresh)
+    # if ipython_exists:
+        # ipykernel.iostream.OutStream.write = partial(_overwritten_func, ipyout, sigfigs, thresh)
+        # IPython.sys.stdout.write = partial(_overwritten_func, ipython_stdout, sigfigs, thresh)
 
 
 def end() -> None:
     """End builtin print-overriding."""
-    #global print
-
-    del print
+    global print
+    print = builtin_print
     del sys.stdout.write

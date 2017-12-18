@@ -7,26 +7,67 @@ especially when using a REPL like IPython.
 
 Python 2 is unsupported, due to unicode handling.
 
-Example use:
+Example use. Run scinot.start() to override default print and REPL output:
+
+.. code-block:: python
+
+    341283875012.238
+    
+>> 341283875012.238
 
 .. code-block:: python
 
     import scinot
 
+    scinot.start()
+    341283875012.238
+
+>> 3.413 x 10 :sup:`11`  
+
+Call scinot.end() to return to remove scinot's parsing:
+
+.. code-block:: python
+
+    scinot.end()
+
+    341283875012.238
+
+>> 341283875012.238
+
+You can specify the number of significant figures to display with start, 
+and how long the number must be to invoke scientific notation. It defaults
+to 4 significant figures, and order-of-magnitude 4:
+
+.. code-block:: python
+
+    scinot.start(sigfigs=2, thresh=3)
+    15
+
+>> 15
+
+.. code-block:: python
+
+    152
+
+>> 1.5 x 10 :sup:`2`  
+
+
+Call scinot.parse() to return a string in scientific notation:
+
+.. code-block:: python
+
     scinot.parse(341283875012.238)
 
->> 3.41 x 10 :sup:`11`
+>> '3.413 x 10 :sup:`11`'
 
 You can also specify the number of significant figures to display; it
 defaults to 3.
 
 .. code-block:: python
 
-    import scinot
-
     scinot.parse(-.00000409348, 2)
     
->> -4.1 x 10 :sup:`-6`
+>> '-4.1 x 10 :sup:`-6`'
 
 
 You can call scinot.disp(), instead of scinot.parse() to print the result
@@ -37,5 +78,5 @@ If you're running Python in a Windows terminal and see squares instead of
 exponents, try a different font, like Source Code Pro.
 
 I've built this module with my own use-case in mind, and have likely overlooked
-features that would extend and improve functionalit. If you have an idea,
+features that would extend and improve functionality. If you have an idea,
 please contact me, or submit a pull request.
