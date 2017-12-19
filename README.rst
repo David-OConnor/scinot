@@ -24,7 +24,7 @@ Example use. Run scinot.start() to override default print and REPL output:
 
 >> 3.413 x 10 :sup:`11`  
 
-Call scinot.end() to return to remove scinot's parsing:
+Call scinot.end() to return to remove parsing:
 
 .. code-block:: python
 
@@ -52,11 +52,11 @@ to 4 significant figures, and order-of-magnitude 4:
 >> 1.5 x 10 :sup:`2`  
 
 
-Call scinot.parse() to return a string in scientific notation:
+Call scinot.format() to return a string in scientific notation:
 
 .. code-block:: python
 
-    scinot.parse(341283875012.238)
+    scinot.format(341283875012.238)
 
 >> '3.413 x 10 :sup:`11`'
 
@@ -65,13 +65,13 @@ defaults to 3.
 
 .. code-block:: python
 
-    scinot.parse(-.00000409348, 2)
+    scinot.format(-.00000409348, 2)
     
 >> '-4.1 x 10 :sup:`-6`'
 
 
-You can call scinot.disp(), instead of scinot.parse() to print the result
-directly, rather than returning a string. Parse and Disp both take two
+Call scinot.disp() instead of scinot.format() to print the result
+directly, rather than returning a string. format and disp both take two
 arguments: The number, and optionally, the amount of significant figures.
 
 If you're running Python in a Windows terminal and see squares instead of

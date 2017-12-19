@@ -32,7 +32,7 @@ SUPERSCRIPT_LOOKUP = {
 }
 
 
-def parse(number: float, sigfigs: int=3) -> str:
+def format(number: float, sigfigs: int=4) -> str:
     """Convert a number to a string representation of scientific notation."""
     if not isinstance(number, float) and not isinstance(number, int):
         raise ValueError("The first argument must be a number.")
@@ -40,10 +40,11 @@ def parse(number: float, sigfigs: int=3) -> str:
         raise ValueError("sigfigs must be an integer.")
 
     # power is our number's order of magnitude.
-    power = int(math.log10(abs(number)))
+    raw_power = math.log10(abs(number))
+    power = int(raw_power)
 
     # Needed to prevent result from being an OOM off.
-    if power < 0:
+    if 0 > power != raw_power:
         power -= 1
 
     # trimmed is the number we're raising to a power of 10.
@@ -65,10 +66,10 @@ def parse(number: float, sigfigs: int=3) -> str:
     return f"{trimmed} × 10{power_disp}"
 
 
-def disp(number: float, sigfigs: int=3, display_func=builtin_print) -> None:
-    """Wrapper around parse that, rather than returning a string,
+def disp(number: float, sigfigs: int=4, display_func=builtin_print) -> None:
+    """Wrapper around format that, rather than returning a string,
     prints to the console."""
-    display_func(parse(number, sigfigs))
+    display_func(format(number, sigfigs))
 
 
 def _overwritten_func(builtin_func: Callable, sigfigs: int, thresh: int, text: str) -> None:
@@ -79,10 +80,16 @@ def _overwritten_func(builtin_func: Callable, sigfigs: int, thresh: int, text: s
         builtin_func(text)
         return
     
-    power = int(math.log10(abs(number)))
+    # power is our number's order of magnitude.
+    raw_power = math.log10(abs(number))
+    power = int(raw_power)
+
+    # Needed to prevent result from being an OOM off.
+    if 0 > power != raw_power:
+        power -= 1
 
     # Only process if the number's order of magnitude is greater than power_thresh.
-    if power >= thresh - 1 or power <= -thresh + 2:
+    if power >= thresh or power <= -thresh:
         disp(number, sigfigs, builtin_func)
     else:
         builtin_func(text)
@@ -91,7 +98,6 @@ def _overwritten_func(builtin_func: Callable, sigfigs: int, thresh: int, text: s
 def start(sigfigs: int=4, thresh: int=5) -> None:
     """Override the print function, so appropriate numbers are displayed
     in scientific notation."""
-
     print = partial(_overwritten_func, builtin_print, sigfigs, thresh)
     sys.stdout.write = partial(_overwritten_func, builtin_stdout, sigfigs, thresh)
     # if ipython_exists:
