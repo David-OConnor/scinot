@@ -13,8 +13,8 @@ setup(
     author="David O'Connor",
     author_email="david.alan.oconnor@gmail.com",
     url='https://github.com/David-OConnor/scinot',
-    description="Express numbers in scientific notation.",
+    description="Display numbers in scientific notation.",
     long_description=readme,
     license="MIT",
-    keywords="scientific notation, exponential",
+    keywords="scientific notation, exponential, REPL",
 )

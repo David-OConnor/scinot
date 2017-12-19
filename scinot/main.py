@@ -11,8 +11,9 @@ except ModuleNotFoundError:
 
 
 # Save the bulitin stdout and print here, since we'll modify them later.
-builtin_print = print
+# builtin_print = print
 builtin_stdout = sys.stdout.write
+
 if ipython_exists:
     ipython_stdout = IPython.sys.stdout.write
     ipyout = ipykernel.iostream.OutStream.write
@@ -32,6 +33,17 @@ SUPERSCRIPT_LOOKUP = {
 }
 
 
+def _find_power(number: float) -> int:
+    """Helper function."""
+    raw_power = math.log10(abs(number))
+    power = int(raw_power)
+
+    # Needed to prevent result from being an OOM off.
+    if 0 > power != raw_power:
+        power -= 1
+    return power
+
+
 def format(number: float, sigfigs: int=4) -> str:
     """Convert a number to a string representation of scientific notation."""
     if not isinstance(number, float) and not isinstance(number, int):
@@ -40,12 +52,7 @@ def format(number: float, sigfigs: int=4) -> str:
         raise ValueError("sigfigs must be an integer.")
 
     # power is our number's order of magnitude.
-    raw_power = math.log10(abs(number))
-    power = int(raw_power)
-
-    # Needed to prevent result from being an OOM off.
-    if 0 > power != raw_power:
-        power -= 1
+    power = _find_power(number)
 
     # trimmed is the number we're raising to a power of 10.
     trimmed = round(number / 10**power, sigfigs - 1)
@@ -66,40 +73,59 @@ def format(number: float, sigfigs: int=4) -> str:
     return f"{trimmed} × 10{power_disp}"
 
 
-def disp(number: float, sigfigs: int=4, display_func=builtin_print) -> None:
+def disp(number: float, sigfigs: int=4, display_func=print) -> None:
     """Wrapper around format that, rather than returning a string,
     prints to the console."""
     display_func(format(number, sigfigs))
 
 
-def _overwritten_func(builtin_func: Callable, sigfigs: int, thresh: int, text: str) -> None:
+# def _overwritten_print(sigfigs: int, thresh: int, *objects,
+#                        sep='', end='\n', file=sys.stdout, flush=False) -> None:
+#     """This function makes sure that if we don't use scientific notation, print's
+#     extra argument are passed to the builtin print."""
+#     # builtin_print("TT")
+#     text = objects[0]  # todo Handle multiple items?
+#
+#     try:
+#         number = float(text)
+#     except ValueError:
+#         print(*objects, sep, end, file, flush)
+#         return
+#
+#     # power is our number's order of magnitude.
+#     power = _find_power(number)
+#
+#     # Only process if the number's order of magnitude is greater than power_thresh.
+#     if power >= thresh or power <= -thresh:
+#         disp(number, sigfigs)
+#     else:
+#         print(*objects, sep, end, file, flush)
+
+
+def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
     """Override a display func like stdout or print."""
     try:
         number = float(text)
     except ValueError:
-        builtin_func(text)
+        builtin_stdout(text)
         return
     
     # power is our number's order of magnitude.
-    raw_power = math.log10(abs(number))
-    power = int(raw_power)
-
-    # Needed to prevent result from being an OOM off.
-    if 0 > power != raw_power:
-        power -= 1
+    power = _find_power(number)
 
     # Only process if the number's order of magnitude is greater than power_thresh.
     if power >= thresh or power <= -thresh:
-        disp(number, sigfigs, builtin_func)
+        disp(number, sigfigs, builtin_stdout)
     else:
-        builtin_func(text)
+        builtin_stdout(text)
 
 
-def start(sigfigs: int=4, thresh: int=5) -> None:
+def start(sigfigs: int=4, thresh: int=4) -> None:
     """Override the print function, so appropriate numbers are displayed
     in scientific notation."""
-    print = partial(_overwritten_func, builtin_print, sigfigs, thresh)
-    sys.stdout.write = partial(_overwritten_func, builtin_stdout, sigfigs, thresh)
+    # global print
+    # print = partial(_overwritten_print, sigfigs, thresh)
+    sys.stdout.write = partial(_overwritten_stdout, sigfigs, thresh)
     # if ipython_exists:
         # ipykernel.iostream.OutStream.write = partial(_overwritten_func, ipyout, sigfigs, thresh)
         # IPython.sys.stdout.write = partial(_overwritten_func, ipython_stdout, sigfigs, thresh)
@@ -107,6 +133,6 @@ def start(sigfigs: int=4, thresh: int=5) -> None:
 
 def end() -> None:
     """End builtin print-overriding."""
-    global print
-    print = builtin_print
+    # global print
+    # print = builtin_print
     del sys.stdout.write
