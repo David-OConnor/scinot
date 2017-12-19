@@ -5,7 +5,7 @@ from typing import Callable
 
 ipython_exists = True
 try:
-    import IPython, ipykernel.iostream
+    import IPython
 except ModuleNotFoundError:
     ipython_exists = False
 
@@ -14,9 +14,9 @@ except ModuleNotFoundError:
 # builtin_print = print
 builtin_stdout = sys.stdout.write
 
-if ipython_exists:
-    ipython_stdout = IPython.sys.stdout.write
-    ipyout = ipykernel.iostream.OutStream.write
+# if ipython_exists:
+#     ipython_stdout = IPython.sys.stdout.write
+#     # ipyout = ipykernel.iostream.OutStream.write
 
 SUPERSCRIPT_LOOKUP = {
     '0': '⁰',
@@ -79,29 +79,6 @@ def disp(number: float, sigfigs: int=4, display_func=print) -> None:
     display_func(format(number, sigfigs))
 
 
-# def _overwritten_print(sigfigs: int, thresh: int, *objects,
-#                        sep='', end='\n', file=sys.stdout, flush=False) -> None:
-#     """This function makes sure that if we don't use scientific notation, print's
-#     extra argument are passed to the builtin print."""
-#     # builtin_print("TT")
-#     text = objects[0]  # todo Handle multiple items?
-#
-#     try:
-#         number = float(text)
-#     except ValueError:
-#         print(*objects, sep, end, file, flush)
-#         return
-#
-#     # power is our number's order of magnitude.
-#     power = _find_power(number)
-#
-#     # Only process if the number's order of magnitude is greater than power_thresh.
-#     if power >= thresh or power <= -thresh:
-#         disp(number, sigfigs)
-#     else:
-#         print(*objects, sep, end, file, flush)
-
-
 def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
     """Override a display func like stdout or print."""
     try:
@@ -120,19 +97,66 @@ def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
         builtin_stdout(text)
 
 
+class SciNum:
+    """For compatibility with IPython's pretty printer: Contains a string,
+    with a REPR that allows pretty() to print without quotes, as it would
+    if using the string directly."""
+    def __init__(self, text: str):
+        self.text = text
+
+    def __repr__(self):
+        return self.text
+
+
+def _print_ipython(sigfigs: int, thresh: int, arg, p, cycle) -> None:
+    """Uses IPython's pretty printer to modify output for a qtconsole or notebook;
+    stdout doesn't seem to work for them."""
+    # power is our number's order of magnitude.
+    power = _find_power(arg)
+
+    # Only process if the number's order of magnitude is greater than power_thresh.
+    if power >= thresh or power <= -thresh:
+        p.text(IPython.lib.pretty.pretty(SciNum(format(arg))))
+    else:
+        p.text(IPython.lib.pretty.pretty(arg))
+
+
+def normal_ipy_printer(arg, p, cycle) -> None:
+    p.text(IPython.lib.pretty.pretty(arg))
+
+
 def start(sigfigs: int=4, thresh: int=4) -> None:
-    """Override the print function, so appropriate numbers are displayed
+    """Override stdout and Ipython output, so appropriate numbers are displayed
     in scientific notation."""
-    # global print
-    # print = partial(_overwritten_print, sigfigs, thresh)
     sys.stdout.write = partial(_overwritten_stdout, sigfigs, thresh)
-    # if ipython_exists:
-        # ipykernel.iostream.OutStream.write = partial(_overwritten_func, ipyout, sigfigs, thresh)
-        # IPython.sys.stdout.write = partial(_overwritten_func, ipython_stdout, sigfigs, thresh)
+    if not ipython_exists:
+        return
+
+    ip = IPython.get_ipython()
+    # We only need to handle IPython separately if in a Qtconsole or Notebook.
+    if isinstance(ip, IPython.terminal.interactiveshell.TerminalInteractiveShell):
+        return
+
+    text_formatter = ip.display_formatter.formatters['text/plain']
+    print_ipython = partial(_print_ipython, sigfigs, thresh)
+
+    text_formatter.for_type(float, print_ipython)
+    text_formatter.for_type(int, print_ipython)
 
 
 def end() -> None:
-    """End builtin print-overriding."""
-    # global print
-    # print = builtin_print
+    """End output overriding."""
     del sys.stdout.write
+
+    if not ipython_exists:
+        return
+
+    ip = IPython.get_ipython()
+    # We only need to handle IPython separately if in a Qtconsole or Notebook.
+    if isinstance(ip, IPython.terminal.interactiveshell.TerminalInteractiveShell):
+        return
+
+    text_formatter = ip.display_formatter.formatters['text/plain']
+
+    text_formatter.for_type(float, normal_ipy_printer)
+    text_formatter.for_type(int, normal_ipy_printer)
