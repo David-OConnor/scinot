@@ -99,7 +99,7 @@ def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
 
 class SciNum:
     """For compatibility with IPython's pretty printer: Contains a string,
-    with a REPR that allows pretty() to print without quotes, as it would
+    with a __repr__ that allows pretty() to print without quotes, as it would
     if using the string directly."""
     def __init__(self, text: str):
         self.text = text

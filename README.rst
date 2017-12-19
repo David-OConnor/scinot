@@ -5,9 +5,16 @@ This package expresses numbers in scientific notation, in formatted
 strings. It's intended use to to make computational results easily readable,
 especially when using a REPL like IPython.
 
+Installation:
+
+.. code-block:: bash
+
+    pip install scinot
+
 Python 2 is unsupported, due to unicode handling.
 
-Example use. Run scinot.start() to override default print and REPL output:
+Use: Run scinot.start() to format REPL output and printing as scientific notation.
+----------------------------------------------------------------------------------
 
 .. code-block:: python
 
@@ -75,7 +82,8 @@ directly, rather than returning a string. format and disp both take two
 arguments: The number, and optionally, the amount of significant figures.
 
 If you're running Python in a Windows terminal and see squares instead of
-exponents, try a different font, like Source Code Pro.
+exponents, try a different font, like Source Code Pro. Scinot's start() behavior
+will not work if sympy.init_printing() is activated.
 
 I've built this module with my own use-case in mind, and have likely overlooked
 features that would extend and improve functionality. If you have an idea,
