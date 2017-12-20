@@ -5,10 +5,10 @@ with open('README.rst') as f:
 
 setup(
     name="scinot",
-    version="0.0.5",
+    version="0.0.6",
     packages=find_packages(),
 
-    install_requires=[],
+    install_requires=['colorama'],
 
     author="David O'Connor",
     author_email="david.alan.oconnor@gmail.com",

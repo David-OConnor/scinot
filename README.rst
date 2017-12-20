@@ -77,8 +77,8 @@ defaults to 3.
 >> '-4.1 x 10 :sup:`-6`'
 
 
-Call scinot.disp() instead of scinot.format() to print the result
-directly, rather than returning a string. format and disp both take two
+Call scinot.sciprint() instead of scinot.format() to print the result
+directly, rather than returning a string. format and sciprint both take two
 arguments: The number, and optionally, the amount of significant figures.
 
 If you're running Python in a Windows terminal and see squares instead of
