@@ -10,4 +10,4 @@ init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
 
 test_script:
-  - "%PYTHON%\pytest.py"
+  - "%PYTHON%/pytest.py"
