@@ -8,6 +8,8 @@ environment:
 
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
+  - "pip.exe install -r requirements.txt"
+  - "pip.exe install pytest"
 
 test_script:
   - "%PYTHON%/pytest.py"
