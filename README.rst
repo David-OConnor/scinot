@@ -2,7 +2,7 @@ SciNot
 ======
 
 This package expresses numbers in scientific notation, in formatted
-strings. Its intended use to to make computational results easier to read,
+strings. Its intended use is to make computational results easier to read,
 especially when using a REPL like IPython.
 
 Installation:
