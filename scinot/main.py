@@ -60,6 +60,8 @@ def format(number: float, sigfigs: int=4) -> str:
     """Convert a number to a string representation of scientific notation."""
     if not isinstance(number, float) and not isinstance(number, int):
         raise ValueError("The first argument must be a number.")
+    if number == 0:
+        return "0"
     if not isinstance(sigfigs, int):
         raise ValueError("sigfigs must be an integer.")
     if sigfigs < 1:
@@ -112,6 +114,9 @@ def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
     except ValueError:
         builtin_stdout(text)
         return
+    if number == 0:  # Catch this here to avoid a math domain error on log10.
+        builtin_stdout(text)
+        return
     
     # power is our number's order of magnitude.
     power = _find_power(number)
@@ -130,6 +135,9 @@ def _print_ipython(sigfigs: int, thresh: int, arg, p, cycle) -> None:
     """Uses IPython's pretty printer to modify output for a qtconsole or notebook;
     stdout doesn't seem to work for them."""
     # power is our number's order of magnitude.
+    if arg == 0:  # Catch here to prevent math domain error.
+        p.text(IPython.lib.pretty.pretty(arg))
+        return
     power = _find_power(arg)
 
     # Only process if the number's order of magnitude is greater than power_thresh.
