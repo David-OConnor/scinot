@@ -1,7 +1,8 @@
 from functools import partial
 import math
 import sys
-from typing import Callable
+
+import colorama
 
 ipython_exists = True
 try:
@@ -18,7 +19,7 @@ builtin_stdout = sys.stdout.write
 #     ipython_stdout = IPython.sys.stdout.write
 #     # ipyout = ipykernel.iostream.OutStream.write
 
-SUPERSCRIPT_LOOKUP = {
+superscript_lookup = {
     '0': '⁰',
     '1': '¹',
     '2': '²',
@@ -31,6 +32,17 @@ SUPERSCRIPT_LOOKUP = {
     '9': '⁹',
     '-': '⁻',
 }
+
+
+class SciNum:
+    """For compatibility with IPython's pretty printer: Contains a string,
+    with a __repr__ that allows pretty() to print without quotes, as it would
+    if using the string directly."""
+    def __init__(self, text: str):
+        self.text = text
+
+    def __repr__(self):
+        return self.text
 
 
 def _find_power(number: float) -> int:
@@ -68,19 +80,28 @@ def format(number: float, sigfigs: int=4) -> str:
         return f"{trimmed} × 10"
 
     # Convert power to unicode superscript.
-    power_disp = ''.join([SUPERSCRIPT_LOOKUP[digit] for digit in str(power)])
+    power_disp = ''.join([superscript_lookup[digit] for digit in str(power)])
 
     return f"{trimmed} × 10{power_disp}"
 
 
-def disp(number: float, sigfigs: int=4, display_func=print) -> None:
+def _color(scitext: str) -> str:
+    colored_text = scitext.replace(" × 10", colorama.Fore.CYAN + " × 10" + colorama.Fore.RESET)
+    for power in superscript_lookup.values():
+        colored_text = colored_text.replace(power, colorama.Fore.GREEN + power + colorama.Fore.RESET)
+
+    return colored_text
+
+
+def sciprint(number: float, sigfigs: int=4) -> None:
     """Wrapper around format that, rather than returning a string,
     prints to the console."""
-    display_func(format(number, sigfigs))
+    print(_color(format(number, sigfigs)))
 
 
 def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
-    """Override a display func like stdout or print."""
+    """Override standard out, if printing scientific notation with a power
+    that exceeds a threshhold."""
     try:
         number = float(text)
     except ValueError:
@@ -92,20 +113,9 @@ def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
 
     # Only process if the number's order of magnitude is greater than power_thresh.
     if power >= thresh or power <= -thresh:
-        disp(number, sigfigs, builtin_stdout)
+        builtin_stdout(_color(format(number, sigfigs)))
     else:
         builtin_stdout(text)
-
-
-class SciNum:
-    """For compatibility with IPython's pretty printer: Contains a string,
-    with a __repr__ that allows pretty() to print without quotes, as it would
-    if using the string directly."""
-    def __init__(self, text: str):
-        self.text = text
-
-    def __repr__(self):
-        return self.text
 
 
 def _print_ipython(sigfigs: int, thresh: int, arg, p, cycle) -> None:
@@ -116,12 +126,12 @@ def _print_ipython(sigfigs: int, thresh: int, arg, p, cycle) -> None:
 
     # Only process if the number's order of magnitude is greater than power_thresh.
     if power >= thresh or power <= -thresh:
-        p.text(IPython.lib.pretty.pretty(SciNum(format(arg))))
+        p.text(IPython.lib.pretty.pretty(SciNum(_color(format(arg)))))
     else:
         p.text(IPython.lib.pretty.pretty(arg))
 
 
-def normal_ipy_printer(arg, p, cycle) -> None:
+def _normal_ipy_printer(arg, p, cycle) -> None:
     p.text(IPython.lib.pretty.pretty(arg))
 
 
@@ -158,5 +168,5 @@ def end() -> None:
 
     text_formatter = ip.display_formatter.formatters['text/plain']
 
-    text_formatter.for_type(float, normal_ipy_printer)
-    text_formatter.for_type(int, normal_ipy_printer)
+    text_formatter.for_type(float, _normal_ipy_printer)
+    text_formatter.for_type(int, _normal_ipy_printer)
