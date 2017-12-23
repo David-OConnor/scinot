@@ -62,6 +62,8 @@ def format(number: float, sigfigs: int=4) -> str:
         raise ValueError("The first argument must be a number.")
     if not isinstance(sigfigs, int):
         raise ValueError("sigfigs must be an integer.")
+    if sigfigs < 1:
+        raise ValueError("sigfigs must be greater than or equal to 1.")
 
     # power is our number's order of magnitude.
     power = _find_power(number)
