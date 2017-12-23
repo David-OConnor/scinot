@@ -1,9 +1,11 @@
 SciNot
 ======
 
+
 This package expresses numbers in scientific notation, in formatted
 strings. Its intended use is to make computational results easier to read,
-especially when using a REPL like IPython.
+especially when using a REPL like IPython. If using IPython, output is color-coded,
+to visually diferentiate the base and power.
 
 Installation:
 
@@ -88,3 +90,6 @@ will not work if sympy.init_printing() is activated.
 I've built this module with my own use-case in mind, and have likely overlooked
 features that would extend and improve functionality. If you have an idea,
 please contact me, or submit a pull request.
+
+Note: Color, and the proper times symbol are used in the package, but are not
+displayed in this readme due to RST limitations.
