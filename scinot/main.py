@@ -4,20 +4,20 @@ import sys
 
 import colorama
 
-ipython_exists = True
+running_ipython = False
 try:
     import IPython
 except ModuleNotFoundError:
-    ipython_exists = False
+    pass
+else:
+    ip = IPython.get_ipython()
+    if ip is not None:
+        running_ipython = True
 
 
-# Save the bulitin stdout and print here, since we'll modify them later.
-# builtin_print = print
+# Save the bulitin stdout here, since we'll modify it later.
 builtin_stdout = sys.stdout.write
 
-# if ipython_exists:
-#     ipython_stdout = IPython.sys.stdout.write
-#     # ipyout = ipykernel.iostream.OutStream.write
 
 superscript_lookup = {
     '0': '⁰',
@@ -96,7 +96,10 @@ def _color(scitext: str) -> str:
 def sciprint(number: float, sigfigs: int=4) -> None:
     """Wrapper around format that, rather than returning a string,
     prints to the console."""
-    print(_color(format(number, sigfigs)))
+    if running_ipython:
+        print(_color(format(number, sigfigs)))
+    else:
+        print(format(number, sigfigs))
 
 
 def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
@@ -113,7 +116,10 @@ def _overwritten_stdout(sigfigs: int, thresh: int, text: str) -> None:
 
     # Only process if the number's order of magnitude is greater than power_thresh.
     if power >= thresh or power <= -thresh:
-        builtin_stdout(_color(format(number, sigfigs)))
+        if running_ipython:
+            builtin_stdout(_color(format(number, sigfigs)))
+        else:
+            builtin_stdout(format(number, sigfigs))
     else:
         builtin_stdout(text)
 
@@ -139,10 +145,9 @@ def start(sigfigs: int=4, thresh: int=4) -> None:
     """Override stdout and Ipython output, so appropriate numbers are displayed
     in scientific notation."""
     sys.stdout.write = partial(_overwritten_stdout, sigfigs, thresh)
-    if not ipython_exists:
+    if not running_ipython:
         return
-
-    ip = IPython.get_ipython()
+    
     # We only need to handle IPython separately if in a Qtconsole or Notebook.
     if isinstance(ip, IPython.terminal.interactiveshell.TerminalInteractiveShell):
         return
@@ -158,10 +163,9 @@ def end() -> None:
     """End output overriding."""
     del sys.stdout.write
 
-    if not ipython_exists:
+    if not running_ipython:
         return
 
-    ip = IPython.get_ipython()
     # We only need to handle IPython separately if in a Qtconsole or Notebook.
     if isinstance(ip, IPython.terminal.interactiveshell.TerminalInteractiveShell):
         return

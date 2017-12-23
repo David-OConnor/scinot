@@ -1,7 +1,7 @@
 SciNot
 ======
 
-This package expresses numbers in scientific notation, in formatted, colored
+This package expresses numbers in scientific notation, in formatted, color-coded
 strings. Its intended use to to make computational results easier to read,
 especially when using a REPL like IPython.
 
@@ -88,3 +88,6 @@ will not work if sympy.init_printing() is activated.
 I've built this module with my own use-case in mind, and have likely overlooked
 features that would extend and improve functionality. If you have an idea,
 please contact me, or submit a pull request.
+
+Note: Color, and the proper times symbol are used in the package, but are not
+displayed in this readme due to RST limitations.
