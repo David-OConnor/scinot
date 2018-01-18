@@ -79,14 +79,17 @@ def format(number: float, sigfigs: int=4) -> str:
 
     # Don't show the 10 or power if not required.
     if power == 0:
-        return f"{trimmed}"
+        # return f"{trimmed}"
+        return str(trimmed)
     if power == 1:
-        return f"{trimmed} × 10"
+        # return f"{trimmed} × 10"
+        return "{} × 10".format(trimmed)
 
     # Convert power to unicode superscript.
     power_disp = ''.join([superscript_lookup[digit] for digit in str(power)])
 
-    return f"{trimmed} × 10{power_disp}"
+    # return f"{trimmed} × 10{power_disp}"
+    return "{} × 10{}".format(trimmed, power_disp)
 
 
 def _color(scitext: str) -> str:

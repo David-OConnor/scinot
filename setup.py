@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name="scinot",
-    version="0.0.8",
+    version="0.0.9",
     packages=find_packages(),
 
     install_requires=['colorama'],
