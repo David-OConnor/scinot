@@ -1,96 +1,35 @@
-import scinot
 import sys
 
-def test_start_end_sequence(capsys):
+import pytest
 
-    # start scinot for standard prompt input
-    print(12345678)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "12345678\n"
-
-    # currently testing empty result as I couldn't find a way to collect stdout of the function
-    scinot.start()
-    print(12345678)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == ""  # should be "1.235 × 10⁷"
+import scinot
 
 
-    # end scinot for standard prompt input
-    scinot.end()
-    print(12345678)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "12345678\n"
+def test_long_num():
+    assert scinot.format(341283875012.238, 4) == "3.413 × 10¹¹"
 
-def test_sciprint(capsys):
-    # disply scinot with a standard number
-    scinot.sciprint(1234567890)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "1.235 × 10⁹\n"
 
-    # disply scinot with a decimal fraction
-    scinot.sciprint(0.000000001)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "1 × 10⁻⁹\n"
+def test_short_num():
+    assert scinot.format(15, 4) == "1.5 × 10"
 
-    # disply scinot with a standard number and controlled amount of significant figures
-    scinot.sciprint(1234567890, 7)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "1.234568 × 10⁹\n"
 
+def test_tiny_num():
+    assert scinot.format(.0000098326543, 6) == "9.83265 × 10⁻⁶"
+
+
+def test_lower_sigfigs():
+    assert scinot.format(.0000098326543, 3) == "9.83 × 10⁻⁶"
+
+
+def test_neg_num():
+    assert scinot.format(-8328389, 1) == "-8 × 10⁶"
+
+
+def test_0_sigfigs():
     # disply scinot with standard number and 0 as digits count
-    scinot.sciprint(1234567890, 0)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "0 × 10⁹\n"  # TODO I would expect and error message for amount of significant figures <= 0
 
-    # disply scinot with a negative number
-    scinot.sciprint(-1234567890)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "-1.235 × 10⁹\n"
+    with pytest.raises(ValueError):
+        scinot.format(1234567890, 0)
 
-    # disply scinot with a negative number and controlled amount of significant figures
-    scinot.sciprint(-1234567890,2)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "-1.2 × 10⁹\n"
 
-    # disply scinot with a negative number and controlled amount of significant figures
-    scinot.sciprint(-.00000409348, 2)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == "-4.1 × 10⁻⁶\n"
-
-def test_format(capsys):
-
-    # currently testing empty result as I couldn't find a way to collect stdout of the function
-
-    # disply scinot with a standard number
-    scinot.format(1234567890)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == ""  # should be "1.235 × 10⁹\n"
-
-    # disply scinot with a decimal fraction
-    scinot.format(0.000000001)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == ""  # should be "1.235 × 10⁹\n"
-
-    # disply scinot with a standard number and controlled amount of significant figures
-    scinot.format(1234567890, 7)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == ""  # should be ""1.234568 × 10⁹\n"
-
-    # disply scinot with standard number and 0 as digits count
-    scinot.format(1234567890, 0)
-    sys.stderr.write("error\n")
-    out, err = capsys.readouterr()
-    assert out == ""  # should be "0 × 10⁹\n" # TODO I would expect and error message for amount of significant figures <= 0
+# todo: Test std output.

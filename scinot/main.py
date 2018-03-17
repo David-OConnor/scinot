@@ -79,6 +79,7 @@ def format(number: float, sigfigs: int=4) -> str:
 
     # Don't show the 10 or power if not required.
     if power == 0:
+        # Don't use f-strings, for compatibility with earlier Python3 versions.
         # return f"{trimmed}"
         return str(trimmed)
     if power == 1:
@@ -87,6 +88,9 @@ def format(number: float, sigfigs: int=4) -> str:
 
     # Convert power to unicode superscript.
     power_disp = ''.join([superscript_lookup[digit] for digit in str(power)])
+
+    if trimmed == 1:
+        return "10{}".format(power_disp)
 
     # return f"{trimmed} × 10{power_disp}"
     return "{} × 10{}".format(trimmed, power_disp)
