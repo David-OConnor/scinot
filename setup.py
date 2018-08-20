@@ -1,12 +1,12 @@
-from setuptools import setup, find_packages
+import setuptools
 
 with open('README.rst') as f:
     readme = f.read()
 
-setup(
+setuptools.setup(
     name="scinot",
-    version="0.0.10",
-    packages=find_packages(),
+    version="0.0.11",
+    
 
     install_requires=['colorama'],
 
@@ -17,4 +17,11 @@ setup(
     long_description=readme,
     license="MIT",
     keywords="scientific notation, exponential, REPL",
+    packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3 :: Only",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering",
+    ],
 )
