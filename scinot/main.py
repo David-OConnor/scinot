@@ -1,5 +1,6 @@
 from functools import partial
 import math
+import numbers
 import sys
 
 import colorama
@@ -58,7 +59,7 @@ def _find_power(number: float) -> int:
 
 def format(number: float, sigfigs: int=4) -> str:
     """Convert a number to a string representation of scientific notation."""
-    if not isinstance(number, float) and not isinstance(number, int):
+    if not isinstance(number, numbers.Number):
         raise ValueError("The first argument must be a number.")
     if number == 0:
         return "0"
